@@ -48,7 +48,17 @@ app.post("/", async (req, res) => {
     res.status(400).json({ errorMessage: "Couldn't save message", error: err.errors })
     console.log(err)
   }
+})
 
+app.delete("/messages/:id", async (req, res) => {
+  const id = req.params.id
+  try {
+    const deletedMessage = await Message.findOneAndDelete({ _id: id })
+    res.status(200).json({ message: `Successfully deleted message with id ${deletedMessage._id}` })
+  } catch (err) {
+    res.status(400).json({ errorMessage: "Couldn't delete message", error: err.errors })
+    console.log(err)
+  }
 })
 
 // Start the server
