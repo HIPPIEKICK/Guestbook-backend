@@ -74,7 +74,7 @@ app.post("/", async (req, res) => {
   const newMessage = new Message({ message, name, googleId })
   try {
     const savedMessage = await newMessage.save()
-    console.log(savedMessage)
+    // console.log(savedMessage)
     res.status(201).json(savedMessage)
   }
   catch (err) {
@@ -87,7 +87,7 @@ app.delete("/messages/:id", authenticateLogIn)
 app.delete("/messages/:id", async (req, res) => {
   const id = req.params.id
   const googleId = req.loggedInUser.sub
-  console.log("Delete-route, googleId: ", googleId)
+  // console.log("Delete-route, googleId: ", googleId)
   try {
     const deletedMessage = await Message.findOneAndDelete({ _id: id, googleId })
     if (deletedMessage !== null) {
@@ -97,6 +97,26 @@ app.delete("/messages/:id", async (req, res) => {
     }
   } catch (err) {
     res.status(400).json({ errorMessage: "Couldn't delete message", error: err.errors })
+    console.log(err)
+  }
+})
+
+// Edit message
+app.put("/messages/:id", authenticateLogIn)
+app.put("/messages/:id", async (req, res) => {
+  const message = req.body.message
+  const id = req.params.id
+  const googleId = req.loggedInUser.sub
+  // console.log("Edit-route, googleId: ", googleId)
+  try {
+    const editedMessage = await Message.findOneAndUpdate({ _id: id, googleId }, { message }, { new: true })
+    if (editedMessage !== null) {
+      res.status(200).json({ message: `Successfully edited message with id: ${editedMessage._id}` })
+    } else {
+      res.status(400).json({ errorMessage: "Couldn't edit message" })
+    }
+  } catch (err) {
+    res.status(400).json({ errorMessage: "Couldn't edit message", error: err.errors })
     console.log(err)
   }
 })
