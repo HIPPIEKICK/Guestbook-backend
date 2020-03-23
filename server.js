@@ -20,20 +20,23 @@ const Message = mongoose.model("Message", {
   message: {
     type: String,
     required: true,
-    minlength: 5
+    // minlength: 5
   },
   name: {
     type: String,
     required: true
   },
   googleId: {
-    type: Number,
+    type: String,
     required: true
   },
   createdAt: {
     type: Date,
     default: Date.now
   },
+  likes: [{
+    type: String
+  }]
 })
 
 let jwt = require("jwt-simple")
@@ -43,7 +46,7 @@ const authenticateLogIn = async (req, res, next) => {
   let loggedInUser
 
   if (req.header("Authorization") !== "null") {
-    loggedInUser = await jwt.decode(req.header("Authorization"), issuer, audience)
+    loggedInUser = await jwt.decode(req.header("Authorization"), issuer, audience, "RS256")
   }
   if (loggedInUser) {
     // console.log("Logged in user:", loggedInUser)
@@ -72,6 +75,7 @@ app.post("/", async (req, res) => {
   const googleId = req.loggedInUser.sub
   const { message, name } = req.body
   const newMessage = new Message({ message, name, googleId })
+  console.log(googleId)
   try {
     const savedMessage = await newMessage.save()
     // console.log(savedMessage)
@@ -118,6 +122,30 @@ app.put("/messages/:id", async (req, res) => {
   } catch (err) {
     res.status(400).json({ errorMessage: "Couldn't edit message", error: err.errors })
     console.log(err)
+  }
+})
+app.post("/messages/:id/like", authenticateLogIn)
+app.post("/messages/:id/like", async (req, res) => {
+  const id = req.params.id
+  const message = await Message.findById(id)
+  const googleId = req.loggedInUser.sub
+  if (message) {
+    if (message.likes.includes(googleId)) {
+      const unliked = await Message.findOneAndUpdate(
+        { _id: id },
+        { $pull: { likes: googleId } }
+      )
+      res.status(201).json(unliked)
+    } else {
+      const liked = await Message.findOneAndUpdate(
+        { _id: id },
+        { $addToSet: { likes: googleId } }
+      )
+      res.status(201).json(liked)
+    }
+  }
+  else {
+    res.status(404).json({ message: `Couldn't like message with id: ${id} `, error: err.errors })
   }
 })
 
