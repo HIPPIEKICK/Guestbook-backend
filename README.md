@@ -17,4 +17,4 @@ A guestbook where the user (after login with Google) can:
 - moment, react-facebook-login, react-editext, jwt
 
 Deployed site: https://guestbook-matilda-arvidsson.herokuapp.com/
-Backend-repo here: https://github.com/HIPPIEKICK/Guestbook-backend
+Frontend-repo here: https://github.com/HIPPIEKICK/Guestbook-frontend
