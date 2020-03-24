@@ -2,8 +2,6 @@ import express from "express"
 import bodyParser from "body-parser"
 import cors from "cors"
 import mongoose from "mongoose"
-// import { jwt } from "jwt-simple"
-import crypto from "crypto"
 
 const mongoUrl = process.env.MONGO_URL || "mongodb://localhost/Guestbook"
 mongoose.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true })
@@ -20,7 +18,6 @@ const Message = mongoose.model("Message", {
   message: {
     type: String,
     required: true,
-    // minlength: 5
   },
   name: {
     type: String,
@@ -59,9 +56,16 @@ const authenticateLogIn = async (req, res, next) => {
 }
 
 // Get messages
-app.get("/", authenticateLogIn)
-app.get("/", async (req, res) => {
-  const messages = await Message.find().sort({ createdAt: -1 }).limit(20).exec()
+app.get("/messages", authenticateLogIn)
+app.get("/messages", async (req, res) => {
+  const { search } = req.query
+  const searchRegex = new RegExp(search, "i")
+  let messages
+  if (search) {
+    messages = await Message.find({ message: searchRegex }).sort({ createdAt: -1 }).limit(20).exec()
+  } else {
+    messages = await Message.find().sort({ createdAt: -1 }).limit(20).exec()
+  }
   if (messages.length > 0) {
     res.json(messages)
   } else {
@@ -70,8 +74,8 @@ app.get("/", async (req, res) => {
 })
 
 // Post new message
-app.post("/", authenticateLogIn)
-app.post("/", async (req, res) => {
+app.post("/messages", authenticateLogIn)
+app.post("/messages", async (req, res) => {
   const googleId = req.loggedInUser.sub
   const { message, name } = req.body
   const newMessage = new Message({ message, name, googleId })
