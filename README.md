@@ -16,5 +16,5 @@ A guestbook where the user (after login with Google) can:
 - MongoDb, mongoose
 - moment, react-facebook-login, react-editext, jwt
 
-Deployed site here: https://matilda-arvidsson-guestbook.netlify.com/
+Deployed site: https://guestbook-matilda-arvidsson.herokuapp.com/
 Backend-repo here: https://github.com/HIPPIEKICK/Guestbook-backend
