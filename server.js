@@ -46,25 +46,33 @@ const authenticateLogIn = async (req, res, next) => {
     loggedInUser = await jwt.decode(req.header("Authorization"), issuer, audience, "RS256")
   }
   if (loggedInUser) {
-    // console.log("Logged in user:", loggedInUser)
     req.loggedInUser = loggedInUser
-    next() //when to use next? (calling the next() function which allows the proteced endpoint to continue execution)
+    next()
   } else {
     console.log("not logged in")
     res.status(403).json({ message: "You need to login to access this page" })
   }
 }
 
+app.get('/', (req, res) => {
+  res.send('Hello backend')
+})
+
 // Get messages
 app.get("/messages", authenticateLogIn)
 app.get("/messages", async (req, res) => {
-  const { search } = req.query
+  const { search, page } = req.query
   const searchRegex = new RegExp(search, "i")
   let messages
+
+  const skipResults = (page) => {
+    return ((page - 1) * 10)
+  }
+
   if (search) {
-    messages = await Message.find({ message: searchRegex }).sort({ createdAt: -1 }).limit(20).exec()
+    messages = await Message.find({ message: searchRegex }).sort({ createdAt: -1 }).limit(10).skip(skipResults(page)).exec()
   } else {
-    messages = await Message.find().sort({ createdAt: -1 }).limit(20).exec()
+    messages = await Message.find().sort({ createdAt: -1 }).limit(10).skip(skipResults(page)).exec()
   }
   if (messages.length > 0) {
     res.json(messages)
@@ -95,7 +103,6 @@ app.delete("/messages/:id", authenticateLogIn)
 app.delete("/messages/:id", async (req, res) => {
   const id = req.params.id
   const googleId = req.loggedInUser.sub
-  // console.log("Delete-route, googleId: ", googleId)
   try {
     const deletedMessage = await Message.findOneAndDelete({ _id: id, googleId })
     if (deletedMessage !== null) {
@@ -115,7 +122,6 @@ app.put("/messages/:id", async (req, res) => {
   const message = req.body.message
   const id = req.params.id
   const googleId = req.loggedInUser.sub
-  // console.log("Edit-route, googleId: ", googleId)
   try {
     const editedMessage = await Message.findOneAndUpdate({ _id: id, googleId }, { message }, { new: true })
     if (editedMessage !== null) {
@@ -128,6 +134,8 @@ app.put("/messages/:id", async (req, res) => {
     console.log(err)
   }
 })
+
+//Like message
 app.post("/messages/:id/like", authenticateLogIn)
 app.post("/messages/:id/like", async (req, res) => {
   const id = req.params.id
