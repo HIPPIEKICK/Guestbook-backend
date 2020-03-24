@@ -1,7 +1,20 @@
-# Express Starter Project
+# Guestbook with OAuth login
 
-This project includes the packages and babel setup for an express server, and is just meant to make things a little simpler to get up and running with.
+A guestbook where the user (after login with Google) can:
+- read the 20 latest submitted messages,
+- write their own messages,
+- edit their own messages,
+- delete their own messages,
+- like their own and other's messages,
+- search for messages (and if there are more than 20 results, the user can make a request to see more search results)
 
-## Getting started
+## Tech used
+- JavaScript
+- React
+- Styled Components
+- Node.js
+- MongoDb, mongoose
+- moment, react-facebook-login, react-editext, jwt
 
-Install dependencies with `npm install`, then start the server by running `npm run dev`
+Deployed site here: https://matilda-arvidsson-guestbook.netlify.com/
+Backend-repo here: https://github.com/HIPPIEKICK/Guestbook-backend
